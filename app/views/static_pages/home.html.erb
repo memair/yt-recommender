@@ -1,0 +1,16 @@
+<div class="center jumbotron">
+  <center>
+  <h1>YouTube Recommender</h1>
+  <% flash.each do |key, value| %>
+    <div class="<%= flash_class(key) %>">
+      <%= value %>
+    </div>
+  <% end %>
+  <% unless user_signed_in? %>
+    <%= button_to "Connect with Memair", user_memair_omniauth_authorize_path, id: "sign_in", class: "btn btn-lg btn-primary" %>
+  <% end %>
+  <% if user_signed_in? %>
+    <%= button_to "Delete this app", registration_path(current_user), data: { confirm: 'YouTube Recommender will no longer generate recommendations in Memair.', title: 'Are you sure you?' }, method: :delete, class: "btn btn-lg btn-danger" %>
+  <% end %>
+  </center>
+</div>
