@@ -5,7 +5,7 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :trackable, :validatable,
          :omniauthable, omniauth_providers: [:memair]
 
-  def admin
+  def admin?
     email_domain = self.email.split("@").last
     ['gho.st', 'memair.com'].include? email_domain
   end
