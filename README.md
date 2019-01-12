@@ -27,3 +27,11 @@ bundle exec rake db:drop RAILS_ENV=development
 bundle exec rake db:create RAILS_ENV=development
 bundle exec rake db:migrate RAILS_ENV=development
 ```
+
+### YouTube Channels
+
+sv_catsaway = Channel.create(yt_id: 'UCvxC2_BVnsAcaPEsIUcJx6A')
+
+video_1 = Video.create(channel: sv_catsaway, yt_id: 'W0lhlPdo0mw')
+video_2 = Video.create(channel: sv_catsaway, yt_id: 'gQhlw6F603o', previous_video: video_1)
+video_3 = Video.create(channel: sv_catsaway, yt_id: 'avIjWNpeZZY', previous_video: video_2)
