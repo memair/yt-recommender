@@ -4,6 +4,8 @@ class CreateChannel < ActiveRecord::Migration[5.2]
       t.string :yt_id, null: false
       t.string :title
       t.string :description
+      t.boolean :ordered, default: false
+      t.integer :max_age
       t.datetime :last_extracted_at
 
       t.timestamps

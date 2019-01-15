@@ -30,8 +30,7 @@ bundle exec rake db:migrate RAILS_ENV=development
 
 ### YouTube Channels
 
-sv_catsaway = Channel.create(yt_id: 'UCvxC2_BVnsAcaPEsIUcJx6A')
-
-video_1 = Video.create(channel: sv_catsaway, yt_id: 'W0lhlPdo0mw')
-video_2 = Video.create(channel: sv_catsaway, yt_id: 'gQhlw6F603o', previous_video: video_1)
-video_3 = Video.create(channel: sv_catsaway, yt_id: 'avIjWNpeZZY', previous_video: video_2)
+extra_credits = Channel.create(yt_id: 'UCCODtTcd5M1JavPCOr_Uydg')
+attention_wars = Channel.create(yt_id: 'UCt_t6FwNsqr3WWoL6dFqG9w')
+philip_defranco = Channel.create(yt_id: 'UClFSU9_bUb4Rc6OYfTt5SPw', max_age: 7)
+sv_catsaway = Channel.create(yt_id: 'UCvxC2_BVnsAcaPEsIUcJx6A', ordered: true)

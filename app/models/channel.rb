@@ -1,4 +1,6 @@
 class Channel < ApplicationRecord
+  include ChannelHelper
+
   before_save :set_details
   has_many :videos, dependent: :delete_all
 
@@ -15,6 +17,31 @@ class Channel < ApplicationRecord
     end
   end
 
+  def set_video_order_from_seasons
+    get_playlists.each do |playlist|
+      if playlist_is_a_season?(playlist)
+        items = []
+        previous_video_id = nil
+        playlist.playlist_items.each do |item|
+          video = Video.find_by(yt_id: item.video_id)
+          unless video.nil?
+            video.update_attributes(previous_video_id: previous_video_id)
+            previous_video_id = video.id
+          end
+        end
+      end
+    end
+  end
+
+  def set_video_order_from_published_at
+    videos = self.videos.order(published_at: :asc)
+    previous_video = nil
+    videos.each do |video|
+      video.update_attributes(previous_video: previous_video) if video.previous_video.nil?
+      previous_video = video
+    end
+  end
+
   private
     def set_details
       self.title       = yt_channel.title
@@ -23,5 +50,13 @@ class Channel < ApplicationRecord
 
     def yt_channel
       Yt::Channel.new id: self.yt_id
+    end
+
+    def get_playlists
+      playlists = []
+      yt_channel.playlists.each do |playlist|
+        playlists += [playlist]
+      end
+      playlists
     end
 end

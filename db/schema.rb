@@ -19,6 +19,8 @@ ActiveRecord::Schema.define(version: 2019_01_11_214620) do
     t.string "yt_id", null: false
     t.string "title"
     t.string "description"
+    t.boolean "ordered", default: false
+    t.integer "max_age"
     t.datetime "last_extracted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
