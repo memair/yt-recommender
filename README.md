@@ -34,3 +34,7 @@ extra_credits = Channel.create(yt_id: 'UCCODtTcd5M1JavPCOr_Uydg')
 attention_wars = Channel.create(yt_id: 'UCt_t6FwNsqr3WWoL6dFqG9w')
 philip_defranco = Channel.create(yt_id: 'UClFSU9_bUb4Rc6OYfTt5SPw', max_age: 7)
 sv_catsaway = Channel.create(yt_id: 'UCvxC2_BVnsAcaPEsIUcJx6A', ordered: true)
+
+### Adding channels with rake tasks
+
+`bundle exec rake youtube:add_channel[https://www.youtube.com/philip_defranco,true,7]`
