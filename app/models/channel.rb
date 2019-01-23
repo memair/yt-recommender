@@ -4,6 +4,9 @@ class Channel < ApplicationRecord
   before_save :set_details
   has_many :videos, dependent: :delete_all
 
+  validates :yt_id, uniqueness: true
+  validates_numericality_of :max_age, greater_than_or_equal_to: 0, allow_nil: true, message: 'must be between 0 & 100'
+
   def get_videos
     yt_channel.videos.each do |yt_video|
       self.videos.where(yt_id: yt_video.id).first_or_create do |video|

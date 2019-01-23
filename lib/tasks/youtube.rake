@@ -16,13 +16,14 @@ namespace :youtube do
     puts "finished at #{DateTime.now}"
   end
 
-  desc "Usage: rake youtube:add_channel[https://www.youtube.com/svcatsaway]"
-  task :add_channel, [:url] => [:environment] do |task, args|
+  desc "Usage: rake youtube:add_channel[url,ordered,max_age]"
+  task :add_channel, [:url, :ordered, :max_age] => [:environment] do |task, args|
     puts "getting channel id for #{args[:url]}"
+    ordered = ActiveModel::Type::Boolean.new.cast(args[:ordered]) || false
     response = HTTParty.get(args[:url], timeout: 180)
     channel_id = /yt.setConfig\('CHANNEL_ID', "(([a-z]|[A-Z]|\d|-|_){24})"\);/.match(response.body)[1]
     puts "Creating channel for channel_id: #{channel_id}"
-    channel = Channel.create(yt_id: channel_id)
+    channel = Channel.create(yt_id: channel_id, ordered: ordered, max_age: args[:max_age])
     if channel.valid?
       puts "#{channel.title} created"
     else
