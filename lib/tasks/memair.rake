@@ -34,9 +34,8 @@ namespace :memair do
               videos v
               JOIN videos pv ON v.previous_video_id = pv.id
             WHERE
-              TRUE
+              pv.id IN (#{recently_watched_video_ids.empty? ? '0' : recently_watched_video_ids.join(",")})
               #{'AND v.id NOT IN (' + previous_recommended_video_ids.join(",") + ')' unless previous_recommended_video_ids.empty?}
-              #{'AND v.id NOT IN (' + recently_watched_video_ids.join(",") + ')' unless recently_watched_video_ids.empty?}
             ORDER BY RANDOM()
             LIMIT 5
           ),
