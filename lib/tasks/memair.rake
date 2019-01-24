@@ -23,7 +23,7 @@ namespace :memair do
               videos v
               JOIN channels c ON v.channel_id = c.id
             WHERE
-              v.id NOT IN (#{previous_recommended_video_ids.join(",")})
+              v.id NOT IN (#{previous_recommended_video_ids.empty? ? 'NULL' : previous_recommended_video_ids.join(",")})
               AND v.published_at > CURRENT_DATE - (INTERVAL '1 DAY' * c.max_age)
             ORDER BY published_at DESC
             LIMIT 5
@@ -34,8 +34,8 @@ namespace :memair do
               videos v
               JOIN videos pv ON v.previous_video_id = pv.id
             WHERE
-              v.id NOT IN (#{previous_recommended_video_ids.join(",")})
-              AND pv.id IN (#{recently_watched_video_ids.join(",")})
+              v.id NOT IN (#{previous_recommended_video_ids.empty? ? 'NULL' : previous_recommended_video_ids.join(",")})
+              AND pv.id IN (#{recently_watched_video_ids.empty? ? 'NULL' : recently_watched_video_ids.join(",")})
             ORDER BY RANDOM()
             LIMIT 5
           ),
@@ -45,7 +45,7 @@ namespace :memair do
             videos v
             JOIN channels c ON v.channel_id = c.id
             WHERE
-              v.id NOT IN (#{previous_recommended_video_ids.join(",")})
+              v.id NOT IN (#{previous_recommended_video_ids.empty? ? 'NULL' : previous_recommended_video_ids.join(",")})
               AND v.previous_video_id IS NULL
               AND NOT c.ordered
             ORDER BY RANDOM()
