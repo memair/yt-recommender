@@ -13,7 +13,8 @@
     <% end %>
     <% if user_signed_in? %>
       <h3>View your latest recommendations in <a href="https://memair.com/recommendations">Memair</a></h3>
-      <%= button_to "Uninstall this app", registration_path(current_user), data: { confirm: 'YouTube Recommender will no longer generate recommendations in Memair.', title: 'Are you sure you?' }, method: :delete, class: "btn btn-lg btn-danger" %>
+      <%= link_to "Settings", profile_path, class: "btn btn-lg btn-primary" %>
+      <%= button_to "Uninstall", registration_path(current_user), data: { confirm: 'YouTube Recommender will no longer generate recommendations in Memair.', title: 'Are you sure you?' }, method: :delete, class: "btn btn-lg btn-danger" %>
     <% else %>
       <%= button_to "Connect with Memair", user_memair_omniauth_authorize_path, id: "sign_in", class: "btn btn-lg btn-primary" %>
     <% end %>

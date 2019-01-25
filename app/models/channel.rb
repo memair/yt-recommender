@@ -3,9 +3,12 @@ class Channel < ApplicationRecord
 
   before_save :set_details
   has_many :videos, dependent: :delete_all
+  has_many :preferences, dependent: :delete_all
+  after_create :create_preferences
 
   validates :yt_id, uniqueness: true
   validates_numericality_of :max_age, greater_than_or_equal_to: 0, allow_nil: true, message: 'must be between 0 & 100'
+  validates_numericality_of :default_frequency, greater_than_or_equal_to: 0, less_than_or_equal_to: 10, message: 'must be between 0 & 10'
 
   def get_videos
     yt_channel.videos.each do |yt_video|
@@ -42,6 +45,16 @@ class Channel < ApplicationRecord
     videos.each do |video|
       video.update_attributes(previous_video: previous_video) if video.previous_video.nil?
       previous_video = video
+    end
+  end
+
+  def create_preferences
+    User.all.each do |user|
+      Preference.create(
+        user: user,
+        channel: self,
+        frequency: self.default_frequency
+      )
     end
   end
 

@@ -1,5 +1,7 @@
 class User < ApplicationRecord
+  has_many :preferences
   before_destroy :revoke_token
+  after_create :create_preferences
 
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable,
@@ -26,6 +28,16 @@ class User < ApplicationRecord
     user.memair_access_token = credentials['token']
     user.save
     user
+  end
+
+  def create_preferences
+    Channel.all.each do |channel|
+      Preference.create(
+        user: self,
+        channel: channel,
+        frequency: channel.default_frequency
+      )
+    end
   end
 
   private

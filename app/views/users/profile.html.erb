@@ -1,0 +1,22 @@
+<h1>User Profile</h1>
+
+<% flash.each do |key, value| %>
+  <div class="<%= flash_class(key) %>">
+    <%= value %>
+  </div>
+<% end %>
+
+<h4>Update recommendation frequency for channels</h4>
+<i>0 = never, 5 = sometimes, 10 = always</i>
+<%= form_for(@user) do |f| %>
+  <% @preferences.each do |preference| %>
+    <%= select_tag("preferences[#{preference.id}]", (options_for_select([*0..10].map { |n| [n.to_s, n] }, preference.frequency))) %>
+    <b><%= preference.channel.title %></b>
+    <br>
+  <% end %>
+
+  <div class="actions">
+    <p><br></p>
+    <%= f.submit 'Update', class: "btn btn-primary" %> <%= link_to 'Back', root_path, class: "btn btn-secondary" %>
+  </div>
+<% end %>

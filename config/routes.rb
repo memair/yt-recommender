@@ -7,4 +7,7 @@ Rails.application.routes.draw do
   end
 
   root 'static_pages#home'
+  
+  get 'profile' => 'users#profile'
+  patch 'profile' => 'users#update', as: :user
 end

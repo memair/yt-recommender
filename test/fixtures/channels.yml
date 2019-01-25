@@ -1,0 +1,18 @@
+philip_defranco:
+  id: 1
+  yt_id: UClFSU9_bUb4Rc6OYfTt5SPw
+  title: Philip DeFranco
+  description: foo bar
+  ordered: true
+  max_age: 7
+  default_frequency: 4
+
+extra_credits:
+  id: 2
+  yt_id: UCCODtTcd5M1JavPCOr_Uydg
+  title: Extra Credits
+  description: foo bar
+  ordered: false
+  max_age: nil
+  default_frequency: 6
+  
