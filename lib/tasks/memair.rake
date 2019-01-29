@@ -49,16 +49,21 @@ namespace :memair do
               AND NOT c.ordered
               #{'AND v.id NOT IN (' + previous_recommended_video_ids.join(",") + ')' unless previous_recommended_video_ids.empty?}
             ORDER BY RANDOM()
-            LIMIT 10
+            LIMIT 50
           )
         SELECT *
-        FROM time_sensitive
-        UNION
-        SELECT *
-        FROM series
-        UNION
-        SELECT *
-        FROM others
+        FROM (
+          SELECT *
+          FROM time_sensitive
+          UNION
+          SELECT *
+          FROM series
+          UNION
+          SELECT *
+          FROM others) v
+        GROUP BY id, priority, expires_at
+        ORDER BY priority DESC
+        LIMIT 25
       """
       results = ActiveRecord::Base.connection.execute(sql).to_a
 
