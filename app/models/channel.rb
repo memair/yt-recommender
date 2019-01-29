@@ -58,14 +58,24 @@ class Channel < ApplicationRecord
     end
   end
 
+  def update_details
+    self.update_attributes(
+      title: yt_channel.title,
+      description: yt_channel.description,
+      thumbnail_url: yt_channel.thumbnail_url
+    )
+  end
+
   private
-    def set_details
-      self.title       = yt_channel.title
-      self.description = yt_channel.description
-    end
 
     def yt_channel
-      Yt::Channel.new id: self.yt_id
+      @yt_channel = @yt_channel || (Yt::Channel.new id: self.yt_id)
+    end
+    
+    def set_details
+      self.title         = yt_channel.title
+      self.description   = yt_channel.description
+      self.thumbnail_url = yt_channel.thumbnail_url
     end
 
     def get_playlists

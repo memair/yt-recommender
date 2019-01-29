@@ -22,7 +22,7 @@ gem 'devise',                 '~> 4.5'
 gem 'omniauth-memair',        '0.0.3'
 
 gem 'memair', '~> 0.0.28'
-gem 'yt',     '~> 0.28.0'
+gem 'yt',     '~> 0.32.2'
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
