@@ -11,7 +11,7 @@
 <%= form_for(@user) do |f| %>
   <% @preferences.each do |preference| %>
     <%= select_tag("preferences[#{preference.id}]", (options_for_select([*0..10].map { |n| [n.to_s, n] }, preference.frequency))) %>
-    <b><%= preference.channel.title %></b>
+    <b><a href="https://www.youtube.com/channel/<%= preference.channel.yt_id %>" target="_blank"><%= preference.channel.title %></a></b>
     <br>
   <% end %>
 
