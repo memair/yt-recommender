@@ -4,7 +4,7 @@ class UsersController < ApplicationController
 
   def profile
     @user = current_user
-    @preferences = @user.preferences.order(:id)
+    @preferences = @user.preferences.order(:id).includes(:channel)
   end
 
   def update
