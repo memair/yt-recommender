@@ -1,8 +1,8 @@
 require 'test_helper'
 
 class UserTest < ActiveSupport::TestCase
-  test "admins if memair.com address" do
-    user = User.create(email: 'greg@memair.com', password: 'password')
+  test "admins if greg's email address" do
+    user = User.create(email: 'greg@gho.st', password: 'password')
     assert user.admin?
   end
 
