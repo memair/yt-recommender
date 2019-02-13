@@ -24,7 +24,7 @@
               <br><b>channel details</b><br>
               <%= preference.channel.videos.count %> videos<br>
               <% if preference.channel.last_extracted_at %>
-                Last extracted <%= distance_of_time_in_words(DateTime.now, Channel.second.last_extracted_at) %> ago
+                Last extracted <%= distance_of_time_in_words(DateTime.now, preference.channel.last_extracted_at) %> ago
               <% else %>
                 Never extracted
               <% end %>
