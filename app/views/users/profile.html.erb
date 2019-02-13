@@ -1,4 +1,4 @@
-<h1>User Profile</h1>
+<h1>Video preferences</h1>
 
 <% flash.each do |key, value| %>
   <div class="<%= flash_class(key) %>">
@@ -8,12 +8,32 @@
 
 <h4>Update recommendation frequency for channels</h4>
 <i>0 = never, 5 = sometimes, 10 = always</i>
+
 <%= form_for(@user) do |f| %>
-  <% @preferences.each do |preference| %>
-    <%= select_tag("preferences[#{preference.id}]", (options_for_select([*0..10].map { |n| [n.to_s, n] }, preference.frequency))) %>
-    <b><a href="https://www.youtube.com/channel/<%= preference.channel.yt_id %>" target="_blank"><%= preference.channel.title %></a></b>
-    <br>
-  <% end %>
+
+  <div class="row">
+    <% @preferences.each do |preference| %>
+      <div class="col-sm-3">
+        <div class="card">
+          <img class="card-img-top" src="<%= preference.channel.thumbnail_url %>" alt="<%= preference.channel.title %> thumbnail">
+          <div class="card-body">
+            <h5 class="card-title"><a href="https://www.youtube.com/channel/<%= preference.channel.yt_id %>" target="_blank"><%= preference.channel.title %></a></h5>
+            <p class="card-text"><%= preference.channel.description.truncate(200) %></p>
+            weight: <%= select_tag("preferences[#{preference.id}]", (options_for_select([*0..10].map { |n| [n.to_s, n] }, preference.frequency))) %>
+            <% if @user.admin? %>
+              <br><b>channel details</b><br>
+              <%= preference.channel.videos.count %> videos<br>
+              <% if preference.channel.last_extracted_at %>
+                Last extracted <%= distance_of_time_in_words(DateTime.now, Channel.second.last_extracted_at) %> ago
+              <% else %>
+                Never extracted
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
 
   <div class="actions">
     <p><br></p>
