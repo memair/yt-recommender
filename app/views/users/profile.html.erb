@@ -19,6 +19,12 @@
           <div class="card-body">
             <h5 class="card-title"><a href="https://www.youtube.com/channel/<%= preference.channel.yt_id %>" target="_blank"><%= preference.channel.title %></a></h5>
             <p class="card-text"><%= preference.channel.description.truncate(200) %></p>
+            <i>
+            <% if preference.channel.max_age %>
+              Videos <%= preference.channel.max_age %> day or newer will be recommended
+            <% else %>
+              Videos of any age will be recommended
+            <% end%></i><br>
             weight: <%= select_tag("preferences[#{preference.id}]", (options_for_select([*0..10].map { |n| [n.to_s, n] }, preference.frequency))) %>
             <% if @user.admin? %>
               <br><b>channel details</b><br>
