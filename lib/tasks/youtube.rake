@@ -1,20 +1,29 @@
 namespace :youtube do
-  desc "Get new videos from YouTube"
+  desc "Get new videos from YouTube. Usage: rake youtube:get_videos 3"
   task :get_videos => :environment do
     puts "started at #{DateTime.now}"
-    channel = Channel.order('last_extracted_at ASC NULLS FIRST').first
-    puts "updating details for #{channel.title}"
-    channel.update_details
-    puts "getting videos for #{channel.title}"
-    channel.get_videos
-    channel.update_attributes(last_extracted_at: DateTime.now)
-    if channel.ordered
-      puts "channel ordered by published_at"
-      channel.set_video_order_from_published_at
-    else
-      puts "channel unordered or ordered by seasons"
-      channel.set_video_order_from_seasons
+
+    ARGV.each { |a| task a.to_sym do ; end }
+    i = (ARGV[1] || 1).to_i
+
+    puts "getting videos from #{i} channel(s)"
+
+    i.times do
+      channel = Channel.order('last_extracted_at ASC NULLS FIRST').first
+      puts "updating details for #{channel.title}"
+      channel.update_details
+      puts "getting videos for #{channel.title}"
+      channel.get_videos
+      channel.update_attributes(last_extracted_at: DateTime.now)
+      if channel.ordered
+        puts "channel ordered by published_at"
+        channel.set_video_order_from_published_at
+      else
+        puts "channel unordered or ordered by seasons"
+        channel.set_video_order_from_seasons
+      end
     end
+
     puts "finished at #{DateTime.now}"
   end
 
