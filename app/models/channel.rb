@@ -13,7 +13,6 @@ class Channel < ApplicationRecord
   def get_videos
     yt_channel.videos.each do |yt_video|
       begin
-        puts "adding #{yt_video.title}"
         if yt_video.duration.to_i > 0
           self.videos.where(yt_id: yt_video.id).first_or_create do |video|
             video.yt_id        = yt_video.id
@@ -24,10 +23,9 @@ class Channel < ApplicationRecord
             video.duration     = yt_video.duration
           end
         else
-          puts "video likely a live vid"
         end
       rescue Yt::Errors::NoItems
-        puts "video failed for some reason"
+        # ignore live videos that fail
       end
     end
   end
