@@ -11,9 +11,9 @@ namespace :youtube do
     i.times do
       channel =
         Channel.where(last_extracted_at: nil).first || # never extracted
-        Channel.where("last_extracted_at < ?", DateTime.now - 14.days).order(last_extracted_at: :asc).first || # not recenlty extracted
-        Channel.joins(:videos).where("published_at > ?", DateTime.now - 14.days).where("last_extracted_at < ?", DateTime.now - 24.hours).order(last_extracted_at: :asc).first || # rarely posting channel
-        Channel.joins(:videos).where("published_at > ?", DateTime.now - 4.days).where("last_extracted_at < ?", DateTime.now - 4.hours).order(last_extracted_at: :asc).first || # frequently posting channel
+        Channel.where("last_extracted_at < ?", DateTime.now - 14.days).order(last_extracted_at: :asc).first || # not extracted in the last 14 days
+        Channel.joins(:videos).where("published_at > ?", DateTime.now - 14.days).where("last_extracted_at < ?", DateTime.now - 24.hours).order(last_extracted_at: :asc).first || # rarely posting channel - a new video within the last 14 days but not extracted for 24 hours
+        Channel.joins(:videos).where("published_at > ?", DateTime.now - 7.days).where("last_extracted_at < ?", DateTime.now - 4.hours).group(:id).having("COUNT(channel_id) > 1").order(last_extracted_at: :asc).first || # frequently posting channel - at least 2 new videos in the last 7 days but not extracted for 4 hours
         Channel.order(last_extracted_at: :asc).first # catch all
 
       puts "updating details for #{channel.title}"
