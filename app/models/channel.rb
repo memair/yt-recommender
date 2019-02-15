@@ -2,8 +2,8 @@ class Channel < ApplicationRecord
   include ChannelHelper
 
   before_save :set_details
-  has_many :videos, dependent: :delete_all
-  has_many :preferences, dependent: :delete_all
+  has_many :videos, dependent: :destroy
+  has_many :preferences, dependent: :destroy
   after_create :create_preferences
 
   validates :yt_id, uniqueness: true
