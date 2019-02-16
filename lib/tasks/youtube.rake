@@ -23,7 +23,7 @@ namespace :youtube do
       Channel.
         joins(:videos).
         where("published_at > ?", DateTime.now - 14.days).
-        where("last_extracted_at < ?", DateTime.now - 24.hours).
+        where("last_extracted_at < ?", DateTime.now - 48.hours).
         order(last_extracted_at: :asc).
         first
     end
@@ -34,7 +34,7 @@ namespace :youtube do
         where("published_at > ?", DateTime.now - 7.days).
         where("last_extracted_at < ?", DateTime.now - 4.hours).
         group(:id).
-        having("COUNT(channel_id) > 1").
+        having("COUNT(channel_id) > 2").
         order(last_extracted_at: :asc).
         first
     end
