@@ -28,11 +28,12 @@ namespace :youtube do
         first
     end
 
-    def frequently_posting_channel
+    def frequently_posting_time_sensitive_channel
       Channel.
         joins(:videos).
         where("published_at > ?", DateTime.now - 7.days).
         where("last_extracted_at < ?", DateTime.now - 4.hours).
+        where(max_age: nil).
         group(:id).
         having("COUNT(channel_id) > 2").
         order(last_extracted_at: :asc).
@@ -44,7 +45,7 @@ namespace :youtube do
     end
 
     i.times do
-      channel = never_extracted || not_extracted_last_14_days || rarely_posting_channel || frequently_posting_channel || catch_all
+      channel = never_extracted || not_extracted_last_14_days || rarely_posting_channel || frequently_posting_time_sensitive_channel || catch_all
 
       puts "updating details for #{channel.title}"
       channel.update_details
