@@ -61,7 +61,7 @@ class User < ApplicationRecord
             #{'AND v.id NOT IN (' + previous_recommended_video_ids.join(",") + ')' unless previous_recommended_video_ids.empty?}
         ),
         timely AS (
-          SELECT v.id, v.channel_id, (NOW() + INTERVAL '3' DAY)::text AS expires_at, v.published_at, v.duration, 10 AS type_weight
+          SELECT v.id, v.channel_id, (NOW() + INTERVAL '3' DAY)::text AS expires_at, v.published_at, v.duration, 7 AS type_weight
           FROM
             channels c
             JOIN videos v ON c.id = v.channel_id
@@ -71,7 +71,7 @@ class User < ApplicationRecord
             #{'AND v.id NOT IN (' + previous_recommended_video_ids.join(",") + ')' unless previous_recommended_video_ids.empty?}
         ),
         series AS (
-          SELECT v.id, v.channel_id, (NOW() + INTERVAL '7' DAY)::text AS expires_at, v.published_at, v.duration, 5 AS type_weight
+          SELECT v.id, v.channel_id, (NOW() + INTERVAL '7' DAY)::text AS expires_at, v.published_at, v.duration, 6 AS type_weight
           FROM
             videos v
             JOIN videos pv ON v.previous_video_id = pv.id
@@ -92,7 +92,8 @@ class User < ApplicationRecord
             v.id,
             v.expires_at,
             v.duration,
-            p.frequency * v.type_weight * (EXTRACT(EPOCH FROM v.published_at) - 1000000000) * (2 + RANDOM()) AS weight
+            p.frequency * v.type_weight * (EXTRACT(EPOCH FROM v.published_at) - 1000000000) * (2 + RANDOM()) AS weight,
+            COUNT(v.channel_id) OVER (PARTITION BY v.channel_id) AS channel_count
           FROM (
             SELECT *
             FROM timeless
@@ -108,10 +109,12 @@ class User < ApplicationRecord
         ordered AS (
           SELECT *, SUM(duration) OVER (ORDER BY weight DESC) AS cumulative_duration
           FROM recommendable
+          WHERE channel_count < 3
         )
       SELECT id, expires_at
       FROM ordered
-      WHERE cumulative_duration < 2 * 60 * 60;
+      WHERE
+        cumulative_duration < 90 * 60;
     """
 
     results = ActiveRecord::Base.connection.execute(sql).to_a
