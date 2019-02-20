@@ -3,7 +3,7 @@ class Recommendation
   include ActiveModel::Conversion
   extend ActiveModel::Naming
 
-  attr_accessor :video, :expires_at, :priority
+  attr_accessor :video, :expires_at, :priority, :thumbnail_url, :duration, :published_at
 
   validate :is_video
   validates :expires_at, presence: true

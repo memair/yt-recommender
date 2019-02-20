@@ -41,7 +41,7 @@ class User < ApplicationRecord
     end
   end
 
-  def get_recommendations
+  def get_recommendations(priority=75)
     previous = previous_watched_and_recommended(self.memair_access_token)
 
     previous_recommended_video_ids = Video.where(yt_id: previous[:recommended]).ids
@@ -92,6 +92,8 @@ class User < ApplicationRecord
             v.id,
             v.expires_at,
             v.duration,
+            v.published_at,
+            c.thumbnail_url,
             p.frequency * v.type_weight * (EXTRACT(EPOCH FROM v.published_at) - 1000000000) * (2 + RANDOM()) AS weight,
             COUNT(v.channel_id) OVER (PARTITION BY v.channel_id) AS channel_count
           FROM (
@@ -104,6 +106,7 @@ class User < ApplicationRecord
             SELECT *
             FROM series) v
             JOIN preferences p ON v.channel_id = p.channel_id AND p.user_id = #{self.id}
+            JOIN channels c ON v.channel_id = c.id
           ORDER BY 4 DESC
         ),
         ordered AS (
@@ -111,7 +114,7 @@ class User < ApplicationRecord
           FROM recommendable
           WHERE channel_count < 3
         )
-      SELECT id, expires_at
+      SELECT id, expires_at, published_at, duration, thumbnail_url
       FROM ordered
       WHERE
         cumulative_duration < 90 * 60;
@@ -119,13 +122,7 @@ class User < ApplicationRecord
 
     results = ActiveRecord::Base.connection.execute(sql).to_a
     videos = Video.where(id: results.map {|r| r['id']}) # prevent n + 1 query
-    expires_at = results.map {|r| r['expires_at']}
-
-    recommendations = []
-    results.count.times do |i|
-      recommendations.append(Recommendation.new(video: videos[i], priority: 75, expires_at: expires_at[i]))
-    end
-    recommendations
+    results.each_with_index.map { |r, idx| Recommendation.new(video: videos[idx], priority: priority, expires_at: r['expires_at'], thumbnail_url: r['thumbnail_url'], published_at: r['published_at'], duration: r['duration']) }
   end
 
   private
