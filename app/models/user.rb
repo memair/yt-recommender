@@ -121,8 +121,7 @@ class User < ApplicationRecord
     """
 
     results = ActiveRecord::Base.connection.execute(sql).to_a
-    videos = Video.where(id: results.map {|r| r['id']}) # prevent n + 1 query
-    results.each_with_index.map { |r, idx| Recommendation.new(video: videos[idx], priority: priority, expires_at: r['expires_at'], thumbnail_url: r['thumbnail_url'], published_at: r['published_at'], duration: r['duration']) }
+    results.each_with_index.map { |r, idx| Recommendation.new(video: Video.find(r['id']), priority: priority, expires_at: r['expires_at'], thumbnail_url: r['thumbnail_url'], published_at: r['published_at'], duration: r['duration']) }
   end
 
   private
