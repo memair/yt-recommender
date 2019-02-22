@@ -119,9 +119,8 @@ class User < ApplicationRecord
       WHERE
         cumulative_duration < 90 * 60;
     """
-
     results = ActiveRecord::Base.connection.execute(sql).to_a
-    results.each_with_index.map { |r, idx| Recommendation.new(video: Video.find(r['id']), priority: priority, expires_at: r['expires_at'], thumbnail_url: r['thumbnail_url'], published_at: r['published_at'], duration: r['duration']) }
+    results.map { |r| Recommendation.new(video: Video.find(r['id']), priority: priority, expires_at: r['expires_at'], thumbnail_url: r['thumbnail_url'], published_at: r['published_at'], duration: r['duration']) }
   end
 
   private
