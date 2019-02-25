@@ -120,7 +120,6 @@ class User < ApplicationRecord
         ordered AS (
           SELECT *, SUM(duration) OVER (ORDER BY weight DESC) AS cumulative_duration
           FROM recommendable
-          WHERE channel_count < 3
         )
       SELECT yt_id, expires_at, published_at, duration, thumbnail_url, description, title
       FROM ordered
