@@ -1,5 +1,6 @@
 class User < ApplicationRecord
   has_many :preferences
+  has_many :videos, through: :preferences
   before_destroy :revoke_token
   after_create :create_preferences
 
@@ -41,6 +42,10 @@ class User < ApplicationRecord
     end
   end
 
+  def recommendable_videos
+    self.preferences.joins(:videos).select('videos.*')
+  end
+
   def get_recommendations(priority=75)
     previous = previous_watched_and_recommended(self.memair_access_token)
 
@@ -51,7 +56,7 @@ class User < ApplicationRecord
     sql = """
       WITH
         timeless AS (
-          SELECT v.id, v.channel_id, (NOW() + INTERVAL '5' DAY)::text AS expires_at, v.published_at, v.duration, 3 AS type_weight
+          SELECT v.id, (NOW() + INTERVAL '5' DAY)::text AS expires_at, 3 AS type_weight
           FROM
             channels c
             JOIN videos v ON c.id = v.channel_id
@@ -61,7 +66,7 @@ class User < ApplicationRecord
             #{'AND v.id NOT IN (' + previous_recommended_video_ids.join(",") + ')' unless previous_recommended_video_ids.empty?}
         ),
         timely AS (
-          SELECT v.id, v.channel_id, (NOW() + INTERVAL '3' DAY)::text AS expires_at, v.published_at, v.duration, 7 AS type_weight
+          SELECT v.id, (NOW() + INTERVAL '3' DAY)::text AS expires_at, 7 AS type_weight
           FROM
             channels c
             JOIN videos v ON c.id = v.channel_id
@@ -71,7 +76,7 @@ class User < ApplicationRecord
             #{'AND v.id NOT IN (' + previous_recommended_video_ids.join(",") + ')' unless previous_recommended_video_ids.empty?}
         ),
         series AS (
-          SELECT v.id, v.channel_id, (NOW() + INTERVAL '7' DAY)::text AS expires_at, v.published_at, v.duration, 6 AS type_weight
+          SELECT v.id, (NOW() + INTERVAL '7' DAY)::text AS expires_at, 6 AS type_weight
           FROM
             videos v
             JOIN videos pv ON v.previous_video_id = pv.id
@@ -89,12 +94,14 @@ class User < ApplicationRecord
         ),
         recommendable AS (
           SELECT
-            v.id,
-            v.expires_at,
+            v.yt_id,
+            rec.expires_at,
             v.duration,
             v.published_at,
+            v.description,
+            v.title,
             c.thumbnail_url,
-            p.frequency * v.type_weight * (EXTRACT(EPOCH FROM v.published_at) - 1000000000) * (2 + RANDOM()) AS weight,
+            p.frequency * rec.type_weight * (EXTRACT(EPOCH FROM v.published_at) - 1000000000) * (2 + RANDOM()) AS weight,
             COUNT(v.channel_id) OVER (PARTITION BY v.channel_id) AS channel_count
           FROM (
             SELECT *
@@ -104,7 +111,8 @@ class User < ApplicationRecord
             FROM timely
             UNION
             SELECT *
-            FROM series) v
+            FROM series) rec
+            JOIN videos v ON rec.id = v.id
             JOIN preferences p ON v.channel_id = p.channel_id AND p.user_id = #{self.id}
             JOIN channels c ON v.channel_id = c.id
           ORDER BY 4 DESC
@@ -114,15 +122,31 @@ class User < ApplicationRecord
           FROM recommendable
           WHERE channel_count < 3
         )
-      SELECT id, expires_at, published_at, duration, thumbnail_url
+      SELECT yt_id, expires_at, published_at, duration, thumbnail_url, description, title
       FROM ordered
       WHERE
         cumulative_duration < 90 * 60;
     """
     
     results = ActiveRecord::Base.connection.execute(sql).to_a
-    videos = Video.where(id: results.map {|r| r['id']}) # prevent n + 1 query
-    results.each_with_index.map { |r, idx| Recommendation.new(video: videos[idx], priority: priority, expires_at: r['expires_at'], thumbnail_url: r['thumbnail_url'], published_at: r['published_at'], duration: r['duration']) }
+
+    recommendations = []
+    results.each do |video|
+      recommendations.append(
+        Recommendation.new(
+          yt_id: video['yt_id'],
+          title: video['title'],
+          description: video['description'],
+          thumbnail_url: video['thumbnail_url'],
+          duration: video['duration'],
+          published_at: video['published_at'],
+          priority: priority,
+          expires_at: video['expires_at']
+        )
+      )
+    end
+
+    recommendations
   end
 
   private
@@ -132,16 +156,23 @@ class User < ApplicationRecord
       user.query(query)
     end
 
+    # def previous_watched_and_recommended(access_token)
+    #   query = '''
+    #     query{
+    #       watched: DigitalActivities(first: 10000 type: watched_video order: desc order_by: timestamp){url}
+    #       recommended: Recommendations(first: 10000 actioned: true order: desc order_by: timestamp){url}
+    #     }'''
+    #   response = Memair.new(access_token).query(query)
+    #   {
+    #     recommended: response['data']['recommended'].map{|r| youtube_id(r['url'])}.compact.uniq,
+    #     watched: response['data']['watched'].map{|r| youtube_id(r['url'])}.compact.uniq
+    #   }
+    # end
+
     def previous_watched_and_recommended(access_token)
-      query = '''
-        query{
-          watched: DigitalActivities(first: 10000 type: watched_video order: desc order_by: timestamp){url}
-          recommended: Recommendations(first: 10000 actioned: true order: desc order_by: timestamp){url}
-        }'''
-      response = Memair.new(access_token).query(query)
       {
-        recommended: response['data']['recommended'].map{|r| youtube_id(r['url'])}.compact.uniq,
-        watched: response['data']['watched'].map{|r| youtube_id(r['url'])}.compact.uniq
+        recommended: ['Fj6pByz72u4','3fyYaY5cy4o'],
+        watched: ['3fyYaY5cy4o']
       }
     end
   
