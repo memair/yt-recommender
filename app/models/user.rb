@@ -125,7 +125,7 @@ class User < ApplicationRecord
       SELECT yt_id, expires_at, published_at, duration, thumbnail_url, description, title
       FROM ordered
       WHERE
-        cumulative_duration < 90 * 60;
+        cumulative_duration < 60 * 60;
     """
     
     results = ActiveRecord::Base.connection.execute(sql).to_a
@@ -156,23 +156,16 @@ class User < ApplicationRecord
       user.query(query)
     end
 
-    # def previous_watched_and_recommended(access_token)
-    #   query = '''
-    #     query{
-    #       watched: DigitalActivities(first: 10000 type: watched_video order: desc order_by: timestamp){url}
-    #       recommended: Recommendations(first: 10000 actioned: true order: desc order_by: timestamp){url}
-    #     }'''
-    #   response = Memair.new(access_token).query(query)
-    #   {
-    #     recommended: response['data']['recommended'].map{|r| youtube_id(r['url'])}.compact.uniq,
-    #     watched: response['data']['watched'].map{|r| youtube_id(r['url'])}.compact.uniq
-    #   }
-    # end
-
     def previous_watched_and_recommended(access_token)
+      query = '''
+        query{
+          watched: DigitalActivities(first: 10000 type: watched_video order: desc order_by: timestamp){url}
+          recommended: Recommendations(first: 10000 actioned: true order: desc order_by: timestamp){url}
+        }'''
+      response = Memair.new(access_token).query(query)
       {
-        recommended: ['Fj6pByz72u4','3fyYaY5cy4o'],
-        watched: ['3fyYaY5cy4o']
+        recommended: response['data']['recommended'].map{|r| youtube_id(r['url'])}.compact.uniq,
+        watched: response['data']['watched'].map{|r| youtube_id(r['url'])}.compact.uniq
       }
     end
   
