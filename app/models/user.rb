@@ -102,7 +102,7 @@ class User < ApplicationRecord
             v.title,
             c.thumbnail_url,
             p.frequency * rec.type_weight * (EXTRACT(EPOCH FROM v.published_at) - 1000000000) * (2 + RANDOM()) AS weight,
-            COUNT(v.channel_id) OVER (PARTITION BY v.channel_id) AS channel_count
+            v.channel_id
           FROM (
             SELECT *
             FROM timeless
@@ -117,9 +117,14 @@ class User < ApplicationRecord
             JOIN channels c ON v.channel_id = c.id
           ORDER BY 4 DESC
         ),
+        limited_number_per_channel AS (
+          SELECT *, ROW_NUMBER() OVER (PARTITION BY channel_id ORDER BY weight DESC) AS video_channel_count
+          FROM recommendable
+        ),
         ordered AS (
           SELECT *, SUM(duration) OVER (ORDER BY weight DESC) AS cumulative_duration
-          FROM recommendable
+          FROM limited_number_per_channel
+          WHERE video_channel_count < 3
         )
       SELECT yt_id, expires_at, published_at, duration, thumbnail_url, description, title
       FROM ordered
