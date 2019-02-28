@@ -18,10 +18,11 @@ class User < ApplicationRecord
     data        = omniauth_info.info
     credentials = omniauth_info.credentials
 
-    user = User.where(email: data['email']).first
+    user = User.where(id: data['id'].to_i).first
 
     unless user
      user = User.create(
+       id:       data['id'].to_i,
        email:    data['email'],
        password: Devise.friendly_token[0,20]
      )
