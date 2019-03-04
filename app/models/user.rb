@@ -102,7 +102,7 @@ class User < ApplicationRecord
             v.description,
             v.title,
             c.thumbnail_url,
-            p.frequency * rec.type_weight * (EXTRACT(EPOCH FROM v.published_at) - 1000000000) * (2 + RANDOM()) AS weight,
+            p.frequency * rec.type_weight * (EXTRACT(EPOCH FROM v.published_at) - 1200000000) * (4 + RANDOM()) AS weight,
             v.channel_id
           FROM (
             SELECT *
@@ -125,7 +125,7 @@ class User < ApplicationRecord
         ordered AS (
           SELECT *, SUM(duration) OVER (ORDER BY weight DESC) AS cumulative_duration
           FROM limited_number_per_channel
-          WHERE video_channel_count < 3
+          WHERE video_channel_count < 2
         )
       SELECT yt_id, expires_at, published_at, duration, thumbnail_url, description, title
       FROM ordered
