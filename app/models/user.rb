@@ -165,7 +165,7 @@ class User < ApplicationRecord
       query = '''
         query{
           watched: DigitalActivities(first: 10000 type: watched_video order: desc order_by: timestamp){url}
-          recommended: Recommendations(first: 10000 actioned: true order: desc order_by: timestamp){url}
+          recommended: Recommendations(first: 10000 order: desc order_by: timestamp){url}
         }'''
       response = Memair.new(access_token).query(query)
       {
