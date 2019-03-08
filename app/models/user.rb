@@ -1,5 +1,5 @@
 class User < ApplicationRecord
-  has_many :preferences
+  has_many :preferences, dependent: :delete_all
   has_many :videos, through: :preferences
   before_destroy :revoke_token
   after_create :create_preferences
