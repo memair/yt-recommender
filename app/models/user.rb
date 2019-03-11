@@ -130,7 +130,7 @@ class User < ApplicationRecord
       SELECT yt_id, expires_at, published_at, duration, thumbnail_url, description, title
       FROM ordered
       WHERE
-        cumulative_duration < 60 * 60;
+        cumulative_duration < 120 * 60;
     """
     
     results = ActiveRecord::Base.connection.execute(sql).to_a
