@@ -11,7 +11,7 @@ class Channel < ApplicationRecord
   validates_numericality_of :default_frequency, greater_than_or_equal_to: 0, less_than_or_equal_to: 10, message: 'must be between 0 & 10'
 
   def get_videos
-    yt_channel.videos.each do |yt_video|
+    yt_channel.videos.where(published_after: latest_published_at, published_before: DateTime.now.utc.iso8601(0)).each do |yt_video|
       begin
         if yt_video.duration.to_i > 0
           self.videos.where(yt_id: yt_video.id).first_or_create do |video|
@@ -77,6 +77,10 @@ class Channel < ApplicationRecord
 
     def yt_channel
       @yt_channel = @yt_channel || (Yt::Channel.new id: self.yt_id)
+    end
+
+    def latest_published_at
+      self.videos.maximum(:published_at).iso8601(0)
     end
     
     def set_details

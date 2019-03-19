@@ -57,7 +57,7 @@ class User < ApplicationRecord
     sql = """
       WITH
         timeless AS (
-          SELECT v.id, (NOW() + INTERVAL '5' DAY)::text AS expires_at, 3 AS type_weight
+          SELECT v.id, (NOW() + INTERVAL '5' DAY)::text AS expires_at, 5 AS type_weight
           FROM
             channels c
             JOIN videos v ON c.id = v.channel_id
