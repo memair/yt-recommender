@@ -80,7 +80,11 @@ class Channel < ApplicationRecord
     end
 
     def latest_published_at
-      self.videos.maximum(:published_at).iso8601(0)
+      if self.videos.empty?
+        DateTime.new(2005, 2, 14)
+      else
+        self.videos.maximum(:published_at).iso8601(0)
+      end
     end
     
     def set_details
