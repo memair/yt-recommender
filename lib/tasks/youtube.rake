@@ -12,7 +12,7 @@ namespace :youtube do
       Channel.where(last_extracted_at: nil).first
     end
 
-    def not_extracted_last_14_days
+    def not_extracted_last_7_days
       Channel.
         where("last_extracted_at < ?", DateTime.now - 7.days).
         order(last_extracted_at: :asc).
@@ -23,7 +23,7 @@ namespace :youtube do
       Channel.
         joins(:videos).
         where("published_at > ?", DateTime.now - 14.days).
-        where("last_extracted_at < ?", DateTime.now - 24.hours).
+        where("last_extracted_at < ?", DateTime.now - 6.hours).
         order(last_extracted_at: :asc).
         first
     end
@@ -45,7 +45,7 @@ namespace :youtube do
     end
 
     i.times do
-      channel = never_extracted || not_extracted_last_14_days || rarely_posting_channel || frequently_posting_time_sensitive_channel || catch_all
+      channel = never_extracted || not_extracted_last_7_days || rarely_posting_channel || frequently_posting_time_sensitive_channel || catch_all
 
       puts "updating details for #{channel.title}"
       channel.update_details
