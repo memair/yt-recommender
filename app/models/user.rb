@@ -116,7 +116,7 @@ class User < ApplicationRecord
             JOIN videos v ON rec.id = v.id
             JOIN preferences p ON v.channel_id = p.channel_id AND p.user_id = #{self.id}
             JOIN channels c ON v.channel_id = c.id
-          ORDER BY 12 DESC
+          ORDER BY 4 DESC
         ),
         limited_number_per_channel AS (
           SELECT *, ROW_NUMBER() OVER (PARTITION BY channel_id ORDER BY weight DESC) AS video_channel_count
