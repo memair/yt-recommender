@@ -57,7 +57,7 @@ class User < ApplicationRecord
     sql = """
       WITH
         timeless AS (
-          SELECT v.id, (NOW() + INTERVAL '5' DAY)::text AS expires_at, 5 AS type_weight
+          SELECT v.id, (NOW() + INTERVAL '5' DAY)::text AS expires_at, 5 * (EXTRACT(EPOCH FROM v.published_at) - 1000000000) AS type_weight
           FROM
             channels c
             JOIN videos v ON c.id = v.channel_id
@@ -66,8 +66,19 @@ class User < ApplicationRecord
             AND previous_video_id IS NULL
             #{'AND v.id NOT IN (' + previous_recommended_video_ids.join(",") + ')' unless previous_recommended_video_ids.empty?}
         ),
+        random AS (
+          SELECT v.id, (NOW() + INTERVAL '5' DAY)::text AS expires_at, 100 AS type_weight
+          FROM
+            channels c
+            JOIN videos v ON c.id = v.channel_id
+          WHERE
+            max_age IS NULL
+            AND previous_video_id IS NULL
+            #{'AND v.id NOT IN (' + previous_recommended_video_ids.join(",") + ')' unless previous_recommended_video_ids.empty?}
+          LIMIT 1
+        ),
         timely AS (
-          SELECT v.id, (NOW() + INTERVAL '3' DAY)::text AS expires_at, 7 AS type_weight
+          SELECT v.id, (NOW() + INTERVAL '3' DAY)::text AS expires_at, 7 * (EXTRACT(EPOCH FROM v.published_at) - 1500000000) AS type_weight
           FROM
             channels c
             JOIN videos v ON c.id = v.channel_id
@@ -77,7 +88,7 @@ class User < ApplicationRecord
             #{'AND v.id NOT IN (' + previous_recommended_video_ids.join(",") + ')' unless previous_recommended_video_ids.empty?}
         ),
         series AS (
-          SELECT v.id, (NOW() + INTERVAL '7' DAY)::text AS expires_at, 6 AS type_weight
+          SELECT v.id, (NOW() + INTERVAL '7' DAY)::text AS expires_at, 6 * (EXTRACT(EPOCH FROM v.published_at) - 1400000000) AS type_weight
           FROM
             videos v
             JOIN videos pv ON v.previous_video_id = pv.id
@@ -102,11 +113,14 @@ class User < ApplicationRecord
             v.description,
             v.title,
             c.thumbnail_url,
-            p.frequency * rec.type_weight * (EXTRACT(EPOCH FROM v.published_at) - 1000000000) * (2 + RANDOM()) AS weight,
+            p.frequency * rec.type_weight * RANDOM() AS weight,
             v.channel_id
           FROM (
             SELECT *
             FROM timeless
+            UNION
+            SELECT *
+            FROM random
             UNION
             SELECT *
             FROM timely
@@ -116,7 +130,7 @@ class User < ApplicationRecord
             JOIN videos v ON rec.id = v.id
             JOIN preferences p ON v.channel_id = p.channel_id AND p.user_id = #{self.id}
             JOIN channels c ON v.channel_id = c.id
-          ORDER BY 4 DESC
+          ORDER BY 8 DESC
         ),
         limited_number_per_channel AS (
           SELECT *, ROW_NUMBER() OVER (PARTITION BY channel_id ORDER BY weight DESC) AS video_channel_count
@@ -130,7 +144,7 @@ class User < ApplicationRecord
       SELECT yt_id, expires_at, published_at, duration, thumbnail_url, description, title
       FROM ordered
       WHERE
-        cumulative_duration < 60 * 60;
+        cumulative_duration < 90 * 60;
     """
     
     results = ActiveRecord::Base.connection.execute(sql).to_a
