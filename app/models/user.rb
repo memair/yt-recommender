@@ -69,11 +69,15 @@ class User < ApplicationRecord
         random AS (
           SELECT v.id, (NOW() + INTERVAL '5' DAY)::text AS expires_at, 15000000000 AS type_weight
           FROM
-            channels c
+            (
+              SELECT *
+              FROM channels
+              WHERE max_age IS NULL
+              ORDER BY RANDOM()
+              LIMIT 1) c
             JOIN videos v ON c.id = v.channel_id
           WHERE
-            max_age IS NULL
-            AND previous_video_id IS NULL
+            previous_video_id IS NULL
             #{'AND v.id NOT IN (' + previous_recommended_video_ids.join(",") + ')' unless previous_recommended_video_ids.empty?}
           ORDER BY RANDOM()
           LIMIT 1
