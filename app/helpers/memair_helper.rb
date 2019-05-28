@@ -20,7 +20,7 @@ module MemairHelper
 
     """
       mutation {
-        BulkCreate(
+        Create(
           recommendations: [
             #{recommendation_strings.join}
           ]
