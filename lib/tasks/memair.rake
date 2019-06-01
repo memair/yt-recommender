@@ -13,6 +13,7 @@ namespace :memair do
       mutation = generate_recommendation_mutation(recommendations)
       puts mutation
       response = Memair.new(user.memair_access_token).query(mutation)
+      puts "#{response}"
       puts "Bulk Create: #{response['data']['Create']['id']}"
       user.update(last_recommended_at: DateTime.now)
     else
