@@ -57,7 +57,7 @@ class User < ApplicationRecord
     sql = """
       WITH
         timeless AS (
-          SELECT v.id, (NOW() + INTERVAL '5' DAY)::text AS expires_at, 5 * (EXTRACT(EPOCH FROM v.published_at) - 1000000000) AS type_weight
+          SELECT v.id, (NOW() + INTERVAL '5' DAY)::text AS expires_at, 5 * (EXTRACT(EPOCH FROM v.published_at) - 1400000000) AS type_weight
           FROM
             channels c
             JOIN videos v ON c.id = v.channel_id
@@ -67,7 +67,7 @@ class User < ApplicationRecord
             #{'AND v.id NOT IN (' + previous_recommended_video_ids.join(",") + ')' unless previous_recommended_video_ids.empty?}
         ),
         random AS (
-          SELECT v.id, (NOW() + INTERVAL '5' DAY)::text AS expires_at, 15000000000 AS type_weight
+          SELECT v.id, (NOW() + INTERVAL '5' DAY)::text AS expires_at, 1000000000000 AS type_weight
           FROM
             (
               SELECT *
@@ -83,7 +83,7 @@ class User < ApplicationRecord
           LIMIT 1
         ),
         timely AS (
-          SELECT v.id, (NOW() + INTERVAL '3' DAY)::text AS expires_at, 7 * (EXTRACT(EPOCH FROM v.published_at) - 1500000000) AS type_weight
+          SELECT v.id, (NOW() + INTERVAL '3' DAY)::text AS expires_at, 7 * (EXTRACT(EPOCH FROM v.published_at) - 1400000000) AS type_weight
           FROM
             channels c
             JOIN videos v ON c.id = v.channel_id
@@ -151,7 +151,7 @@ class User < ApplicationRecord
       WHERE
         cumulative_duration < 90 * 60;
     """
-    
+
     results = ActiveRecord::Base.connection.execute(sql).to_a
 
     recommendations = []
@@ -192,7 +192,7 @@ class User < ApplicationRecord
         watched: response['data']['watched'].map{|r| youtube_id(r['url'])}.compact.uniq
       }
     end
-  
+
     def youtube_id(url)
       regex = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
       matches = regex.match(url)
