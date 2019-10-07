@@ -21,7 +21,7 @@ gem 'jquery-ui-rails',     '~> 6.0'
 gem 'devise',                 '~> 4.5'
 gem 'omniauth-memair',        '0.0.5'
 
-gem 'memair', '~> 0.1.2'
+gem 'memair', '~> 0.1.3'
 gem 'yt',     '~> 0.32.2'
 
 group :development, :test do
