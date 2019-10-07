@@ -19,9 +19,9 @@ gem 'jquery-rails',        '~> 4.3'
 gem 'jquery-ui-rails',     '~> 6.0'
 
 gem 'devise',                 '~> 4.5'
-gem 'omniauth-memair',        '0.0.3'
+gem 'omniauth-memair',        '0.0.5'
 
-gem 'memair', '~> 0.1.1'
+gem 'memair', '~> 0.1.2'
 gem 'yt',     '~> 0.32.2'
 
 group :development, :test do
