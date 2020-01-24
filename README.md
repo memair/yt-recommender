@@ -38,4 +38,6 @@ sv_catsaway = Channel.create(yt_id: 'UCvxC2_BVnsAcaPEsIUcJx6A', ordered: true)
 
 ### Adding channels with rake tasks
 
-`bundle exec rake youtube:add_channel[https://www.youtube.com/philip_defranco,true,7]`
+`heroku run rake youtube:add_channel[https://www.youtube.com/channel/UCIRiWCPZoUyZDbydIqitHtQ]`
+
+`heroku run rake youtube:add_channel[https://www.youtube.com/channel/UCknLrEdhRCp1aegoMqRaCZg,false,3]`
