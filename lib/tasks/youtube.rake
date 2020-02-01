@@ -9,12 +9,13 @@ namespace :youtube do
     puts "getting videos from #{i} #{'channel'.pluralize(i)}"
 
     def never_extracted
-      Channel.where(last_extracted_at: nil).first
+      Channel.where(last_extracted_at: nil).where(deleted_at: nil).first
     end
 
     def not_extracted_last_7_days
       Channel.
         where("last_extracted_at < ?", DateTime.now - 7.days).
+        where(deleted_at: nil).
         order(last_extracted_at: :asc).
         first
     end
@@ -24,6 +25,7 @@ namespace :youtube do
         joins(:videos).
         where("published_at > ?", DateTime.now - 14.days).
         where("last_extracted_at < ?", DateTime.now - 6.hours).
+        where(deleted_at: nil).
         order(last_extracted_at: :asc).
         first
     end
@@ -33,6 +35,7 @@ namespace :youtube do
         joins(:videos).
         where("published_at > ?", DateTime.now - 7.days).
         where("last_extracted_at < ?", DateTime.now - 30.minutes).
+        where(deleted_at: nil).
         where.not(max_age: nil).
         group(:id).
         having("COUNT(channel_id) > 2").
@@ -41,17 +44,23 @@ namespace :youtube do
     end
 
     def catch_all
-      Channel.order(last_extracted_at: :asc).first
+      Channel.where(deleted_at: nil).order(last_extracted_at: :asc).first
     end
 
     i.times do
       channel = never_extracted || not_extracted_last_7_days || rarely_posting_channel || frequently_posting_time_sensitive_channel || catch_all
 
-      puts "updating details for #{channel.title}"
-      channel.update_details
-      puts "getting videos for #{channel.title}"
-      channel.get_videos
+      begin
+        puts "updating details for #{channel.title}"
+        channel.update_details
+        puts "getting videos for #{channel.title}"
+        channel.get_videos
+      rescue Yt::Errors::NoItems
+        channel.update_attributes(deleted_at: DateTime.now)
+      end
+
       channel.update_attributes(last_extracted_at: DateTime.now)
+
       if channel.ordered
         puts "channel ordered by published_at"
         channel.set_video_order_from_published_at

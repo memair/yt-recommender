@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_02_21_000034) do
+ActiveRecord::Schema.define(version: 2020_02_01_010302) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -26,6 +26,7 @@ ActiveRecord::Schema.define(version: 2019_02_21_000034) do
     t.datetime "updated_at", null: false
     t.integer "default_frequency", default: 4
     t.string "thumbnail_url"
+    t.datetime "deleted_at"
   end
 
   create_table "preferences", force: :cascade do |t|
