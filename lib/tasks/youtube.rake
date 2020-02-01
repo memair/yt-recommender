@@ -56,10 +56,13 @@ namespace :youtube do
         puts "getting videos for #{channel.title}"
         channel.get_videos
       rescue Yt::Errors::NoItems
-        channel.update_attributes(deleted_at: DateTime.now)
+        puts "No Items, channel probably deleted"
+        channel.update(deleted_at: DateTime.now)
+        Preferences.where(channel_id: channel.id).delete_all
+        Video.where(channel_id: channel.id).delete_all
       end
 
-      channel.update_attributes(last_extracted_at: DateTime.now)
+      channel.update(last_extracted_at: DateTime.now)
 
       if channel.ordered
         puts "channel ordered by published_at"
