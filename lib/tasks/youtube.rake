@@ -81,7 +81,7 @@ namespace :youtube do
     puts "getting channel id for #{args[:url]}"
     ordered = ActiveModel::Type::Boolean.new.cast(args[:ordered]) || false
     response = HTTParty.get(args[:url], timeout: 180)
-    channel_id = /videos\.xml\?channel_id=(([a-z]|[A-Z]|\d|-|_){24})/.match(response.body)[1]
+    channel_id = /<meta itemprop="channelId" content="(([a-z]|[A-Z]|\d|-|_){24})">/.match(response.body)[1]
 
     puts "Creating channel for channel_id: #{channel_id}"
     channel = Channel.create(yt_id: channel_id, ordered: ordered, max_age: args[:max_age])
